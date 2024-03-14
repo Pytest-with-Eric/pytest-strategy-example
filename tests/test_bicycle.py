@@ -1,10 +1,9 @@
-import pytest
 from bicycle.wheel import Wheel
 from bicycle.gear import Gear
 from bicycle.observer import Observer
 
 
-# Incoming Query Messages
+## Incoming Query Messages
 def test_diameter():
     """
     Test the diameter of the wheel
@@ -26,7 +25,7 @@ def test_calculates_gear_inches():
     )  # Test the interface, not implementation e.g. __ratio, Test Incoming Query Message
 
 
-# Outgoing Command Messages
+## Incoming Command Messages
 def test_set_cog():
     """
     Test the set cog method
@@ -36,9 +35,10 @@ def test_set_cog():
     gear.set_cog(10)  # Outgoing Command Message (causes side effects)
     assert (
         gear.cog == 10
-    )  # Test outgoing command message by making assertions about direct public side effects
+    )  # Test incoming command message by making assertions about direct public side effects
 
 
+## Sent To Self
 # AntiPattern: Testing the implementation - DO NOT TEST PRIVATE METHODS
 def test_calculates_ratio():
     """
@@ -59,7 +59,7 @@ def test_calculates_gear_inches_ratio():
     assert gear._Gear__ratio() == 4.73  # DO NOT TEST PRIVATE METHODS
 
 
-# Outgoing Query Messages
+## Outgoing Query Messages
 # AntiPattern: Testing outgoing query messages - Do NOT test as they are tested as part of the incoming query messages
 def test_calculates_gear_inches_outgoing():
     """
@@ -71,7 +71,7 @@ def test_calculates_gear_inches_outgoing():
     assert gear.wheel.diameter() == 29  # Redundant and duplicates the Wheel test
 
 
-# Outgoing Command Messages
+## Outgoing Command Messages
 # AntiPattern: If you assert what's in the DB, it creates a dependency on distance side effect
 def test_saves_changed_cog_in_db():
     obs = Observer()
@@ -81,11 +81,15 @@ def test_saves_changed_cog_in_db():
     # Assert something about the state of the db
 
 
-@pytest.mark.skip(reason="Test in progress")
-def test_notifies_observers_when_cogs_change():
-    obs = Observer()
+def test_notifies_observers_when_cogs_change(mocker):
+    # Create a mock for the observer "changed" method
+    obs_mock = mocker.patch("bicycle.observer.Observer.changed")
     wheel = Wheel(rim=26, tire=1.5)
-    gear = Gear(chainring=52, cog=11, wheel=wheel, observer=obs)
-    obs.changed.assert_called_with(52, 11)  # Assert that the observer was notified
+    gear = Gear(
+        chainring=52, cog=11, wheel=wheel, observer=obs_mock
+    )  # Pass the mocked Observer to the Gear
     gear.set_cog(27)
-    obs.changed.assert_called_with(52, 27)  # Assert that the observer was notified
+    obs_mock.changed.assert_called_with(52, 27)  # Assert that the observer was notified
+
+    gear.set_cog(36)
+    obs_mock.changed.assert_called_with(52, 36)  # Assert that the observer was notified
