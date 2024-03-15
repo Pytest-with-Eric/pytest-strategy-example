@@ -1,3 +1,4 @@
+import pytest
 from bicycle.wheel import Wheel
 from bicycle.gear import Gear
 from bicycle.observer import Observer
@@ -22,7 +23,7 @@ def test_calculates_gear_inches():
     gear = Gear(chainring=52, cog=11, wheel=wheel)
     assert (
         gear.gear_inches() == 137.17
-    )  # Test the interface, not implementation e.g. __ratio, Test Incoming Query Message
+    )  # Test the interface, not implementation
 
 
 ## Incoming Command Messages
@@ -32,7 +33,7 @@ def test_set_cog():
     """
     wheel = Wheel(rim=26, tire=1.5)
     gear = Gear(chainring=52, cog=11, wheel=wheel)
-    gear.set_cog(10)  # Outgoing Command Message (causes side effects)
+    gear.set_cog(10) 
     assert (
         gear.cog == 10
     )  # Test incoming command message by making assertions about direct public side effects
@@ -40,6 +41,7 @@ def test_set_cog():
 
 ## Sent To Self
 # AntiPattern: Testing the implementation - DO NOT TEST PRIVATE METHODS
+@pytest.mark.skip(reason="DO NOT TEST PRIVATE METHODS")
 def test_calculates_ratio():
     """
     Test the ratio calculation
@@ -48,7 +50,7 @@ def test_calculates_ratio():
     gear = Gear(chainring=52, cog=11, wheel=wheel)
     assert gear._Gear__ratio() == 4.73  # DO NOT TEST PRIVATE METHODS
 
-
+@pytest.mark.skip(reason="DO NOT TEST PRIVATE METHODS")
 def test_calculates_gear_inches_ratio():
     """
     Test the gear inches calculation
@@ -61,6 +63,7 @@ def test_calculates_gear_inches_ratio():
 
 ## Outgoing Query Messages
 # AntiPattern: Testing outgoing query messages - Do NOT test as they are tested as part of the incoming query messages
+@pytest.mark.skip(reason="DO NOT TEST OUTGOING QUERY MESSAGES")
 def test_calculates_gear_inches_outgoing():
     """
     Test the gear inches calculation
@@ -79,7 +82,6 @@ def test_saves_changed_cog_in_db():
     gear = Gear(chainring=52, cog=11, wheel=wheel, observer=obs)
     gear.set_cog(27)
     # Assert something about the state of the db
-
 
 def test_notifies_observers_when_cogs_change(mocker):
     # Create a mock for the observer "changed" method
